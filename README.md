@@ -1,6 +1,6 @@
-# Node-Red-Contrib-Emotiv
+# Node-Red-Contrib-pgproc
 
-Node-Red node for Emotiv's Cortex API.
+Node-Red node for in database processing.
 
 
 ### Status
@@ -10,6 +10,5 @@ pre-alpha
 
 ### Dependencies
 
-- Cortex
 - Node-red
 

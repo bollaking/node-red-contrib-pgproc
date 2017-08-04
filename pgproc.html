@@ -1,54 +1,150 @@
 <script type="text/javascript">
-    RED.nodes.registerType('pgproc',{
-      inputs:1,
-      outputs:1,
-      category:'function',
-      icon: 'function.png',
-      label: function() { return this.name||this.function||'pgproc'},
-      defaults: { 
-        name: { value: 'pgproc' },
-        source: { value: '${result}' },
-        result: { value: null },
-        columns: { value: '*' },
-        function: { value: '' },
-        filter: { value: '' },
-        procname: { value: 'pypex' }
-      }
-  })
+RED.nodes.registerType('pgproc', {
+    inputs: 1,
+    outputs: 1,
+    color: '#a0ffff',
+    category: 'function',
+    icon: 'function.png',
+    label: function() {
+        return this.name || this.function || 'pgproc'
+    },
+    defaults: {
+        name: {
+            value: 'pgproc'
+        },
+        accid: {
+            value: '1'
+        },
+        source: {
+            value: ''
+        },
+        result: {
+            value: null
+        },
+        columns: {
+            value: '*'
+        },
+        function: {
+            value: ''
+        },
+        filter: {
+            value: ''
+        },
+        rows: {
+            value: '0'
+        },
+        // procname: {
+        //     value: 'pypex'
+        // },
+        args: {
+            value: '{}'
+        }
+    },
+    inputs: 1,
+    outputs: 1,
+    oneditprepare: function() {
+        var that = this;
+        this.editor = RED.editor.createEditor({
+            id: 'node-input-args-editor',
+            value: $("#node-input-args").val()
+            // globals: {
+            //     msg:true,
+            //     context:true,
+            //     RED: true,
+                // util: false,
+                // flow: false,
+                // global: false,
+                // console: false,
+            //     Buffer: true,
+            //     setTimeout: true,
+            //     clearTimeout: true,
+            //     setInterval: true,
+            //     clearInterval: true
+            // } 
+        });
+        RED.library.create({
+            // url: "functions", // where to get the data from
+            // type: "function", // the type of object the library is for
+            editor: this.editor, // the field name the main text body goes to
+            fields: ['name', 'args']
+        });
+        console.log("###   created");
+        this.editor.focus();
+    },
+    oneditsave: function() {
+        var annot = this.editor.getSession().getAnnotations();
+        this.noerr = 0;
+        $("#node-input-noerr").val(0);
+        for (var k = 0; k < annot.length; k++) {
+            console.log(annot[k].type,":",annot[k].text, "on line", annot[k].row);
+            if (annot[k].type === "error") {
+                $("#node-input-noerr").val(annot.length);
+                this.noerr = annot.length;
+            }
+        }
+        $("#node-input-args").val(this.editor.getValue());
+        this.editor.destroy();
+        delete this.editor;
+    },
+    oneditcancel: function() {
+        this.editor.destroy();
+        delete this.editor;
+    },
+    oneditresize: function(size) {
+        var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+        var height = $("#dialog-form").height();
+        for (var i = 0; i < rows.size(); i++) {
+            height -= $(rows[i]).outerHeight(true);
+        }
+        var editorRow = $("#dialog-form>div.node-text-editor-row");
+        height -= (parseInt(editorRow.css("marginTop")) + parseInt(editorRow.css("marginBottom")));
+        $(".node-text-editor").css("height", height + "px");
+        this.editor.resize();
+    }
+});
 </script>
 
 <script type="text/x-red" data-template-name="pgproc">
    <div class="form-row">
-      <label for="node-input-name"><i class="fa fa-tag"></i>Node Name</label>
+      <label for="node-input-name"><i class="fa fa-tag"></i>Name</label>
       <input type="text" id="node-input-name" value="pgproc" placeholder="Node Name">
    </div>
    <div class="form-row">
-      <label for="node-input-procname"><i class="fa fa-tag"></i>Proc Name</label>
-      <input type="text" id="node-input-procname" value="pypex" placeholder="Stored Procedure">
+      <label for="node-input-accid"><i class="fa fa-tag"></i>Account Id</label>
+      <input type="text" id="node-input-accid" value="1" placeholder="Account Id">
    </div>
-   <div class="form-tips"><b>Tip:</b> This is here to help.</div>
    <div class="form-row">
       <label for="node-input-function"><i class="fa fa-tag"></i>Function</label>
       <input type="text" id="node-input-function" placeholder="Function Name">
    </div>
    <div class="form-row">
-      <label for="node-input-source"><i class="fa fa-tag"></i>Source</label>
+      <label for="node-input-source"><i class="fa fa-tag"></i>Source Table</label>
       <input type="text" id="node-input-source" placeholder="Source Table">
    </div>
    <div class="form-row">
-      <label for="node-input-result"><i class="fa fa-tag"></i>Result</label>
+      <label for="node-input-result"><i class="fa fa-tag"></i>Result Table</label>
       <input type="text" id="node-input-result" placeholder="Result Table">
    </div>
+   <div class="form-row">
+      <label for="node-input-rows"><i class="fa fa-tag"></i>Rows</label>
+      <input type="text" id="node-input-rows" value=0 placeholder="Number of rows">
+   </div>
+       <div class="form-row" style="margin-bottom: 0px;">
+        <label for="node-input-args"><i class="fa fa-wrench"></i>Params</label>
+        <input type="hidden" id="node-input-args" autofocus="autofocus">
+        <input type="hidden" id="node-input-noerr"> 
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-args-editor" ></div>
+    </div>
+   <div class="form-tips"><b>Tip:</b>These are not used at the moment.</div>
    <div class="form-row">
       <label for="node-input-columns"><i class="fa fa-tag"></i>Columns</label>
       <input type="text" id="node-input-columns" value="*" placeholder="Source Columns">
    </div>
    <div class="form-row">
       <label for="node-input-filter"><i class="fa fa-tag"></i>Filter</label>
-      <input type="text" id="node-input-columns" value="*" placeholder="Source Filter">
-   </div>
-   <div class="form-row">
-      <label for="node-input-params"><i class="fa fa-tag"></i>Params</label>
-      <input type="text" id="node-input-columns" value="*" placeholder="Function Params">
+      <input type="text" id="node-input-filter" value="*" placeholder="Source Filter">
    </div>
 </script>
+

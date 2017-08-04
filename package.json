@@ -13,19 +13,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mattaylor/node-red-contrib-emotiv.git"
+    "url": "git+https://github.com/bollaking/node-red-contrib-pgproc.git"
   },
   "keywords": [
     "node-red",
     "postgres",
     "pgsql"
   ],
-  "author": "mat.taylor@gmail.com",
+  "author": "mr.bking@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mattaylor/node-red-contrib-pgproc/issues"
+    "url": "https://github.com/bollaking/node-red-contrib-pgproc/issues"
   },
-  "homepage": "https://github.com/mattaylor/node-red-contrib-pgproc#readme",
+  "homepage": "https://github.com/bollaking/node-red-contrib-pgproc#readme",
   "dependencies": {
     "knex": "^0.13.0",
     "node-red-contrib-sql": "^0.1.7"
